@@ -22,3 +22,26 @@ Node* build_huffman_tree(int *freq_table) {
     // 3. Retourner la racine
     return NULL; // Implémentation simplifiée pour l'exemple
 }
+
+void generate_codes(Node* root, int* code, int top) {
+    if (root->left) {
+        code[top] = 0;
+        generate_codes(root->left, code, top + 1);
+    }
+    if (root->right) {
+        code[top] = 1;
+        generate_codes(root->right, code, top + 1);
+    }
+    if (!(root->left) && !(root->right)) {
+        printf("%c: ", root->character);
+        for (int i = 0; i < top; i++) printf("%d", code[i]);
+        printf("\n");
+    }
+}
+
+void free_tree(Node* root) {
+    if (root == NULL) return;
+    free_tree(root->left);
+    free_tree(root->right);
+    free(root);
+}
