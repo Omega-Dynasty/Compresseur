@@ -16,7 +16,12 @@ int main(int argc, char *argv[]) {
     int freq_table[256] = {0};
     count_frequencies(file, freq_table); // Fonction de ta branche feat-analyse
     
-    printf("Analyse terminee pour : %s\n", argv[1]);
-    fclose(file);
-    return 0;
+    // ... après count_frequencies(file, freq_table);
+
+    printf("Resultats de l'analyse :\n");
+    for (int i = 0; i < 256; i++) {
+        if (freq_table[i] > 0) {
+            printf("Caractere '%c' (code %d) : %d fois\n", i, i, freq_table[i]);
+        }
+    }
 }
