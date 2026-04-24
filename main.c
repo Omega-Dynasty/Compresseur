@@ -2,20 +2,20 @@
 #include <string.h>
 #include "huffman.h"
 
-// Fonction pour récupérer le code d'un caractère spécifique
-void get_code(Node* root, char c, int* code, int top, char* result) {
+// Fonction pour chercher le code binaire d'un caractère dans l'arbre
+void find_and_write_code(Node* root, char c, FILE* out, int* code, int top) {
     if (root->left) {
         code[top] = 0;
-        get_code(root->left, c, code, top + 1, result);
+        find_and_write_code(root->left, c, out, code, top + 1);
     }
     if (root->right) {
         code[top] = 1;
-        get_code(root->right, c, code, top + 1, result);
+        find_and_write_code(root->right, c, out, code, top + 1);
     }
     if (!(root->left) && !(root->right)) {
         if (root->character == c) {
             for (int i = 0; i < top; i++) {
-                sprintf(result + strlen(result), "%d", code[i]);
+                fprintf(out, "%d", code[i]);
             }
         }
     }
@@ -29,30 +29,31 @@ int main(int argc, char *argv[]) {
 
     FILE *file = fopen(argv[1], "r");
     if (!file) {
-        perror("Erreur ouverture");
+        perror("Erreur lors de l'ouverture du fichier");
         return 1;
     }
 
+    // 1. Analyse des fréquences
     int freq_table[256] = {0};
     count_frequencies(file, freq_table);
 
+    // 2. Construction de l'arbre
     Node* root = build_huffman_tree(freq_table);
     
-    // Création du fichier compressé .ash
-    FILE *out = fopen("test.ash", "w");
+    // 3. Création du fichier compressé .huff
+    FILE *out = fopen("test.huff", "w");
     if (out) {
-        rewind(file); // On repart au début du fichier source
+        rewind(file); // On revient au début du fichier source pour le lire à nouveau
         int c;
         int temp_code[256];
         while ((c = fgetc(file)) != EOF) {
-            char bit_string[256] = "";
-            get_code(root, (char)c, temp_code, 0, bit_string);
-            fprintf(out, "%s", bit_string);
+            find_and_write_code(root, (char)c, out, temp_code, 0);
         }
         fclose(out);
-        printf("Fichier 'test.ash' genere avec succes !\n");
+        printf("Compression terminee : 'test.huff' cree avec succes !\n");
     }
 
+    // Nettoyage
     free_tree(root);
     fclose(file);
     return 0;
